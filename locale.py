@@ -2,42 +2,23 @@ import os
 import util
 import copy
 
-itemtypes=[
-  'item',
-  'ammo',
-  'capsule',
-  'gun',
-  'item-with-entity-data',
-  'item-with-label',
-  'item-with-inventory',
-  'blueprint-book',
-  'item-with-tags',
-  'selection-tool',
-  'blueprint',
-  'copy-paste-tool',
-  'deconstruction-item',
-  'upgrade-item',
-  'module',
-  'rail-planner',
-  'spidertron-remote',
-  'tool',
-  'armor',
-  'repair-tool'
-]
+if util.devel:
+  locales=[os.path.join(util.fdir,'locale.txt')]
+else:
+  mods=filter(lambda x:x.is_dir(),os.scandir(os.path.join(util.fdir,'mods')))
+  locales=[]
+  for mod in mods:
+    if os.path.exists(os.path.join(mod.path,'locale','en')):
+      locales+=[x.path for x in os.scandir(os.path.join(mod.path,'locale','en'))]
+  locales+=[x.path for x in os.scandir(os.path.join(util.fdir,'data','core','locale','en'))]
+  locales+=[x.path for x in os.scandir(os.path.join(util.fdir,'data','base','locale','en'))]
+  locales=[x for x in locales if x.endswith('.cfg')]
 
-mods=filter(lambda x:x.is_dir(),os.scandir(os.path.join(util.fdir,'mods')))
-locales=[]
-for mod in mods:
-  if os.path.exists(os.path.join(mod.path,'locale','en')):
-    locales+=[x.path for x in os.scandir(os.path.join(mod.path,'locale','en'))]
-locales+=[x.path for x in os.scandir(os.path.join(util.fdir,'data','core','locale','en'))]
-locales+=[x.path for x in os.scandir(os.path.join(util.fdir,'data','base','locale','en'))]
-locales=[x for x in locales if x.endswith('.cfg')]
 locale={}
 for file in locales:
   with open(file) as f:
     data=f.read()
-  
+
   category=None
   for line in data.split('\n'):
     if line.strip()=='' or line.startswith(';') or line.startswith('#'):
@@ -89,7 +70,7 @@ def recipelocaleraw(recipe):
   return name,desc
 
 def itemlocale(item,data):
-  for itype in itemtypes:
+  for itype in util.itemtypes:
     if item in data[itype]:
       item=data[itype][item]
       if 'localized_description' not in item:
@@ -113,3 +94,5 @@ def fluidlocale(fluid,data):
   else:
     name=localize(fluid['localized_name'])
   return name,desc
+
+del f,data,line,locales

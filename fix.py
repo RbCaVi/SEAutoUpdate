@@ -1,5 +1,7 @@
 import copy
 
+# normalizes recipes and techs so i can assume some things later
+
 def move(d1,d2,i):
     # move the key i (if it exists) and its value from d1 to d2
     if i in d1:

@@ -6,21 +6,23 @@ import data
 if util.devel:
   locales=[os.path.join(util.fdir,'locale.txt')]
 else:
+  # TODO: handle zipped mods
   mods=filter(lambda x:x.is_dir(),os.scandir(os.path.join(util.fdir,'mods')))
   locales=[]
   for mod in mods:
     if os.path.exists(os.path.join(mod.path,'locale','en')):
       locales+=[x.path for x in os.scandir(os.path.join(mod.path,'locale','en'))]
+  # get the core and base locales as well
   locales+=[x.path for x in os.scandir(os.path.join(util.fdir,'data','core','locale','en'))]
   locales+=[x.path for x in os.scandir(os.path.join(util.fdir,'data','base','locale','en'))]
-  locales=[x for x in locales if x.endswith('.cfg')]
+  locales=[x for x in locales if x.endswith('.cfg')] # not sure if this is needed
 
 locale={}
 for file in locales:
   with open(file) as f:
     fdata=f.read()
 
-  category=None
+  category=None # i don't know how to handle locale entries without a category
   for line in fdata.split('\n'):
     if line.strip()=='' or line.startswith(';') or line.startswith('#'):
       continue
@@ -34,9 +36,11 @@ for file in locales:
         locale[category+'.'+key]=value
 
 def localize(s):
+  # TODO: handle localizing lists
   return locale.get(s)
 
 def recipelocale(recipe,data=data.data):
+  # get the locale for a recipe
   recipe=data['recipe'][recipe]
   return recipelocaleraw(recipe)
 
@@ -71,6 +75,7 @@ def recipelocaleraw(recipe):
   return name,desc
 
 def itemlocale(item,data=data.data):
+  # get the locale for an item or fluid
   if item=='time':
     return 'Time','Time'
   for itype in util.itemtypes:
@@ -88,6 +93,7 @@ def itemlocale(item,data=data.data):
   return fluidlocale(item,data)
 
 def fluidlocale(fluid,data=data.data):
+  # get the locale for a fluid
   fluid=data['fluid'][fluid]
   if 'localized_description' not in fluid:
     desc=localize('fluid-description.'+fluid['name'])
@@ -100,6 +106,7 @@ def fluidlocale(fluid,data=data.data):
   return name,desc
 
 def techlocale(tech,data):
+    # get the locale for a technology
     name=tech
     tech=data['technology'][tech]
     try:

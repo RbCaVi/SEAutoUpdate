@@ -6,6 +6,7 @@ import re
 import util
 import fix
 
+# data extracts the data.raw table from factorio or a cached log file
 
 regen=False
 

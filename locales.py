@@ -166,6 +166,7 @@ def equipmentlocale(equipment,data=data.data):
 def techlocale(tech,data=data.data):
     name=tech
     tech=data['technology'][tech]
+    util.pj(tech)
     try:
         pf=' '+str(int(name.rsplit('-',maxsplit=1)[1]))
         name=name.rsplit('-',maxsplit=1)[0]

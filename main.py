@@ -44,13 +44,6 @@ cats=[x for x in data.data['item'] if 'catalogue' in x]
 #util.pj(processrecipe(datacards[0]))
 #util.pj(list(set([data.data['item-subgroup'][data.data['item'][x].get('subgroup','other')]['group'] for x in data.data['item']])))
 
-util.pj([
-    l for l in locale.locale
-    if 'name' in l and 'science' in l
-])
-
-print(os.listdir('/storage/emulated/0/Documents/factorio-data-1.1.72/factorio-data-1.1.72/base'))
-
 graphicsroots={
     '__space-exploration-graphics__':'/storage/emulated/0/Documents/SE/space-exploration-graphics_0.6.13/space-exploration-graphics',
   }#  '__base__':'/storage/emulated/0/Documents/factorio-data-1.1.72/factorio-data-1.1.72/base'}
@@ -112,11 +105,11 @@ def puttechonwiki(tech):
     info=towiki.towikitech(tech)
     infobox=towiki.toinfobox(info)
     
-    realname=locale.techlocale(item,data.data)[0]
+    realname=locale.techlocale(tech,data.data)[0] or tech
     
     print(realname)
     
-    contents=infobox+category
+    contents=infobox
     
     print(contents)
     

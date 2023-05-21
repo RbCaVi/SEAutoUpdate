@@ -19,6 +19,58 @@ diff_prefixes={
 	   'expensive':'expensive-'
 }
 
+order=[
+    'burner-assembling-machine',
+    'assembling-machine-1',
+    'assembling-machine-2',
+    'assembling-machine-3',
+    'se-space-assembling-machine',
+    'se-space-manufactory',
+    'se-space-supercomputer-1',
+    'se-space-supercomputer-2',
+    'se-space-supercomputer-3',
+    'se-space-supercomputer-4',
+    'se-nexus',
+    'se-space-astrometrics-laboratory',
+    'se-space-biochemical-laboratory',
+    'se-space-electromagnetics-laboratory',
+    'se-space-genetics-laboratory',
+    'se-space-gravimetrics-laboratory',
+    'se-space-laser-laboratory',
+    'se-space-material-fabricator',
+    'se-space-mechanical-laboratory',
+    'se-space-radiation-laboratory',
+    'se-space-thermodynamics-laboratory',
+    'se-space-particle-accelerator',
+    'se-space-particle-collider',
+    'se-space-decontamination-facility',
+    'se-space-radiator',
+    'se-space-radiator-2',
+    'se-space-hypercooler',
+    'se-space-telescope',
+]
+[
+    'character',
+    'character-jetpack',
+    
+]
+
+def reorder(l):
+    newl=[]
+    for i in l:
+        if i not in order:
+            with open('/storage/emulated/0/Documents/pydroid3/seauto/unordered.txt','a') as f:
+                f.write(i)
+                f.write('\n')
+        i=i.replace('-grounded','')
+        if 'telescope' in i:
+            i='se-space-telescope'
+        if 'character' in i:
+            i='character'
+        newl.append(i)
+    l=newl
+    return [i for _,i in sorted([((order+[i]).index(i),i) for i in l])]
+
 postfixes=['','2','3','4','5']
 
 def numtostr(n):
@@ -34,22 +86,20 @@ defaultrinfo={'producers':[]}
 defaulttinfo={}
 
 def towikitech(tech,info=None):
+    util.pj(tech)
     if info is None:
         info=copy.deepcopy(defaulttinfo)
     else:
         info=copy.deepcopy(info)
     n=data.pdata['technology'][tech]
-    info['allows']=process.postreqs['normal'][tech]
-    info['effects']=process.unlocks['normal'][tech]
-    info['required-technologies']=process.prereqs['normal'][tech]
-    info['cost']=n['normal']['count']
-    util.pj([
-        	   (locale.itemlocale(pack[0],data.data),pack)
-        	   for pack in
-        	   n['normal']['packs']
-        ])
-    info['required-packs']=' + '.join([
-        	   locale.itemlocale(pack[0],data.data)[0]+', '+numtostr(pack[1])
+    info['allows']=[*set(map(locale.techname,process.postreqs['normal'][tech]))]
+    info['effects']=[*map(locale.recipename,process.unlocks['normal'][tech])]
+    info['required-technologies']=[*map(locale.techname,process.prereqs['normal'][tech])]
+    info['cost-multiplier']=n['normal']['count']
+    if 'expensive' in info:
+        info['expensive-cost-multiplier']=n['expensive']['count']
+    info['cost']=' + '.join([
+        	   locale.itemlocale(pack[0],data.data)[0]+','+numtostr(pack[1])
         	   for pack in
         	   n['normal']['packs']
         ])
@@ -64,6 +114,18 @@ def towikiitem(item,info=None):
     info['category']=categories[data.data['item-subgroup'][proto['subgroup']]['group']]
     info['internal-name']=item
     info['stack-size']=str(proto['stack_size'])
+    info['consumers']=[*map(locale.recipename,process.uses['normal'].get(item,[]))]
+    return info
+
+def towikifluid(fluid,group,info=None):
+    if info is None:
+        info=copy.deepcopy(defaultrinfo)
+    else:
+        info=copy.deepcopy(info)
+    proto=process.getitem(fluid)
+    util.pj(proto)
+    info['category']=group
+    info['internal-name']=fluid
     return info
 
 def towikirecipe(recipe,info=None,replace=None):
@@ -71,7 +133,7 @@ def towikirecipe(recipe,info=None,replace=None):
         info=copy.deepcopy(defaultrinfo)
     else:
         info=copy.deepcopy(info)
-    if type(recipe)==list:
+    if type(recipe)==list or type(recipe)==tuple:
         for x in recipe:
             info=towikirecipe(x,info,replace)
         return info
@@ -90,37 +152,42 @@ def towikirecipe(recipe,info=None,replace=None):
     else:
         postfix=replace
     n=data.pdata['recipe'][recipe]
-    info['producers']+=map(locale.itemlocale,process.madein[n['category']])
+    info['producers']+=process.madein[n['category']]
     for x in util.difficulty:
         if x not in n:
             continue
         prefix=diff_prefixes[x]
         ings=' + '.join([
-        	   locale.itemlocale(ing[0],data.data)[0]+', '+numtostr(ing[1])
+        	   locale.itemlocale(ing[0],data.data)[0]+','+numtostr(ing[1])
         	   for ing in
         	   [['time',n[x]['time'],'time']]+n[x]['ingredients']
         ])
         ress=' + '.join([
-        	   locale.itemlocale(res[0],data.data)[0]+', '+numtostr(res[1])
+        	   locale.itemlocale(res[0],data.data)[0]+','+numtostr(res[1])
         	   for res in
         	   n[x]['results']
         ])
         recipestr=ings+' > '+ress
-        #util.pj(ings+' > '+ress)
         info[prefix+'recipe'+postfix]=recipestr
-    techs=process.unlockedby.get(recipe,[])
-    info['required-technologies']=' + '.join(techs)
+    print(recipe)
+    techs=process.unlockedby['normal'].get(recipe,[])
+    info['required-technologies']=[*map(locale.techname,techs)]
     return info
 
 def toinfobox(info):
-    info['producers']=' + '.join(sorted(set(info['producers'])))
+    if 'producers' in info:
+      print(info['producers'])
+      info['producers']=' + '.join(map(locale.entityname,reorder(set(info['producers']))))
     s='{{Infobox SE'
     for key in info:
         s+='\n|'
         s+=key
         s+='='
         val=info[key]
-        if type(val)!=str:
+        if type(val)==int:
+            val=str(val)
+        elif type(val)!=str:
+            print(val)
             val=' + '.join(val)
         s+=val
     s+='\n}}'

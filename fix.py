@@ -1,39 +1,31 @@
 import copy
 
-# normalizes recipes and techs so i can assume some things later
-
 def move(d1,d2,i):
-    # move the key i (if it exists) and its value from d1 to d2
     if i in d1:
         d2[i]=d1[i]
         del d1[i]
 
 def fixrecipe(recipe,root=True):
-    # normalize a recipe to the form:
-    # no difficulty-specific properties in the top level
-    # all in normal (and expensive if used)
-    # all ingredients and results are in the full form
-    recipe=copy.deepcopy(recipe) # don't modify the original recipe
+    recipe=copy.deepcopy(recipe)
     if 'normal' in recipe:
         recipe['normal']=fixrecipe(recipe['normal'],False)
         if 'expensive' not in recipe:
             return recipe
     if 'expensive' in recipe:
         recipe['expensive']=fixrecipe(recipe['expensive'],False)
-        if 'normal' not in recipe or not recipe['normal']: # if normal is not defined, but expensive is, set normal to expensive
+        if 'normal' not in recipe or not recipe['normal']:
             recipe['normal']=recipe['expensive']
             del recipe['expensive']
         return recipe
-    recipe['ingredients']=[*map(fixingredient,recipe['ingredients'])] # fix all the ingredients
-    if 'result' in recipe and 'results' not in recipe: # move result to results
+    recipe['ingredients']=[*map(fixingredient,recipe['ingredients'])]
+    if 'result' in recipe and 'results' not in recipe:
         if 'result_count' not in recipe:
             recipe['result_count']=1
         recipe['results']=[[recipe['result'],recipe['result_count']]]
-    recipe['results']=[*map(fixresult,recipe['results'])] # fix the results
+    recipe['results']=[*map(fixresult,recipe['results'])]
     recipe['energy_required']=recipe.get('energy_required',0.5)
     if not root:
         return recipe
-    # move all the difficulty-specific settings to normal
     recipe['normal']={}
     move(recipe,recipe['normal'],'results')
     move(recipe,recipe['normal'],'result')
@@ -59,14 +51,11 @@ def fixrecipe(recipe,root=True):
     return recipe
 
 def fixingredient(ingredient):
-    # fix one ingredient to the table form
     if type(ingredient)==list:
         return {'type':'item','name':ingredient[0],'amount':ingredient[1]}
     return ingredient
 
 def fixresult(result):
-    # fix one result to the table form
-    # the amount_min and amount_max are put into amount
     if type(result)==list:
         result={'type':'item','name':result[0],'amount':result[1]}
     if 'amount_min' in result and 'amount' not in result:

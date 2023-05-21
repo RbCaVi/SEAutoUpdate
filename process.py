@@ -76,7 +76,7 @@ import data
 
 def init():
     global uses,produces
-    global prereqs,postreqs,unlocks
+    global prereqs,postreqs,unlocks,unlockedby
     global ccats,madein
     uses={x:{} for x in util.difficulty}
     produces={x:{} for x in util.difficulty}
@@ -86,13 +86,19 @@ def init():
 	           if x not in recipe:
 	               continue
 	           for ing in recipe[x]['ingredients']:
-	               if ing[0::2] not in uses[x]:
-	                   uses[x][ing[0::2]]=[]
-	               uses[x][ing[0::2]].append(recipe['name'])
+	               #if ing[0::2] not in uses[x]:
+	                   #uses[x][ing[0::2]]=[]
+	               #uses[x][ing[0::2]].append(recipe['name'])
+	               if ing[0] not in uses[x]:
+	                   uses[x][ing[0]]=[]
+	               uses[x][ing[0]].append(recipe['name'])
 	           for res in recipe[x]['results']:
-	               if res[0::2] not in produces[x]:
-	                   produces[x][res[0::2]]=[]
-	               produces[x][res[0::2]].append(recipe['name'])
+	               #if res[0::2] not in produces[x]:
+	                   #produces[x][res[0::2]]=[]
+	               #produces[x][res[0::2]].append(recipe['name'])
+	               if res[0] not in produces[x]:
+	                   produces[x][res[0]]=[]
+	               produces[x][res[0]].append(recipe['name'])
 
     prereqs={x:{} for x in util.difficulty}
     postreqs={x:{} for x in util.difficulty}
@@ -103,8 +109,11 @@ def init():
 	       for x in util.difficulty:
 	           if x not in tech:
 	               continue
+	           for l in [prereqs,postreqs,unlocks,unlockedby]:
+	               if tech['name'] not in l[x]:
+	                   l[x][tech['name']]=[]
 	           for prereq in tech[x]['prerequisites']:
-	               if prereq[0::2] not in postreqs[x]:
+	               if prereq not in postreqs[x]:
 	                   postreqs[x][prereq]=[]
 	               postreqs[x][prereq].append(tech['name'])
 	               if tech['name'] not in prereqs[x]:

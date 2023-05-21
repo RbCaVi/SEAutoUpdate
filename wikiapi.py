@@ -1,4 +1,4 @@
-import json,requests,os
+import json,requests,os,copy,requests.exceptions
 
 import util
 if util.qpy:
@@ -14,10 +14,46 @@ headers={'User-Agent':"SEAutoUpdate/1.0 (robert@robertvail.info)"}
 username="RbCaVi@SEAutoUpdate"
 password="lrqc55rc1r6dqtgl3h9b1hq8u8ccbldv"
 
+def get(query):
+    query=copy.deepcopy(query)
+    query.update({
+        "formatversion":"2",
+        "format":"json",
+    })
+    while True:
+        try:
+            response=session.get(url=apiendpoint,params=query,headers=headers)
+            data=response.json()
+            break
+        except requests.exceptions.JSONDecodeError as e:
+            print(f'error in GET{json.dumps(query)}, retrying')
+            continue
+        except requests.exceptions.ConnectionError as e:
+            print(f'error in POST{json.dumps(query)}, retrying')
+            continue
+    return data
+
+def post(query,**kwargs):
+    query=copy.deepcopy(query)
+    query.update({
+        "formatversion":"2",
+        "format":"json",
+    })
+    while True:
+        try:
+            response=session.post(url=apiendpoint,data=query,headers=headers,**kwargs)
+            data=response.json()
+            break
+        except requests.exceptions.JSONDecodeError as e:
+            print(f'error in POST{json.dumps(query)}, retrying')
+            continue
+        except requests.exceptions.ConnectionError as e:
+            print(f'error in POST{json.dumps(query)}, retrying')
+            continue
+    return data
+
 def getpages(pages):
   query={
-    "formatversion":"2",
-    "format":"json",
     "action":"query",
     "prop":"revisions",
     "rvprop":'|'.join([
@@ -29,30 +65,23 @@ def getpages(pages):
     "curtimestamp":"true",
     "titles":"|".join(pages)
   }
-  response=session.get(url=apiendpoint,params=query,headers=headers)
-  data=response.json()
-  return data
+  return get(query)
 
 def login(name,pw):
   query={
-       "formatversion":"2",
-       "format":"json",
        "action":"query",
        "meta":"tokens",
        "type":"login"
   }
-  response=session.get(url=apiendpoint,params=query,headers=headers)
-  data=response.json()
+  data=get(query)
   token=data['query']['tokens']['logintoken']
   query={
-       "formatversion":"2",
-       "format":"json",
        "action":"login",
        "lgname":name,
        "lgpassword":pw,
        "lgtoken":token,
   }
-  response=session.post(url=apiendpoint,data=query,headers=headers)
+  post(query)
   print("Logged in as "+name)
   #util.pj(response.json())
 
@@ -60,32 +89,30 @@ def getcsrftoken():
     global csrftoken
     if csrftoken is None:
         query={
-           "formatversion":"2",
-           "format":"json",
            "action":"query",
            "meta":"tokens"
         }
-        response=session.get(url=apiendpoint,params=query,headers=headers)
-        data=response.json()
-        csrftoken=data['query']['tokens']['csrftoken']
+        try:
+          data=get(query)
+          csrftoken=data['query']['tokens']['csrftoken']
+        except:
+            print("Error getting csrf token")
     return csrftoken
 
 def gettimestamp():
     query={
-       "formatversion":"2",
-       "format":"json",
        "action":"query",
        "curtimestamp":"true"
     }
-    response=session.get(url=apiendpoint,params=query,headers=headers)
-    data=response.json()
+    data=get(query)
     return data["curtimestamp"]
 
 def edit(title,content,start,base='now',summary='Automatically edited by SEAutoUpdate',minor=False,createonly=True):
   token=getcsrftoken()
+  if not token:
+      print("edit failed: no token")
+      return
   query={
-       "formatversion":"2",
-       "format":"json",
        "action":"edit",
        "title":title,
        "text":content,
@@ -100,9 +127,9 @@ def edit(title,content,start,base='now',summary='Automatically edited by SEAutoU
   if createonly:
     query['createonly']='true'
   
-  response=session.post(url=apiendpoint,data=query,headers=headers)
-  data=response.json()
-  return data
+  if not util.dryrun:
+    data=post(query)
+    return data
 
 def read_chunks(file,size=1024):
     while True:
@@ -116,10 +143,15 @@ def upload(filename,uploadname,comment='Uploaded by SEAutoUpdate',chunksize=1638
     Stash mode is used to build a file up in pieces and then commit it at the end
     """
     
+    if util.dryrun:
+        return
+    
     file=open(filename,'rb')
     size=os.stat(filename).st_size
     
     token=getcsrftoken()
+    if not token:
+        print("upload failed: no token")
 
     chunks = read_chunks(file,chunksize)
     chunk = next(chunks)
@@ -131,15 +163,13 @@ def upload(filename,uploadname,comment='Uploaded by SEAutoUpdate',chunksize=1638
         "filename": uploadname,
         "filesize": size,
         "offset": 0,
-        "format": "json",
         "token": token,
         "ignorewarnings": 1
     }
     index = 0
     filedata = {'chunk':('{}.jpg'.format(index), chunk, 'multipart/form-data')}
     index += 1
-    response = session.post(apiendpoint, files=filedata, data=params)
-    data = response.json()
+    data=post(params, files=filedata)
     util.pj(data)
 
     # Pass the filekey parameter for second and further chunks
@@ -151,14 +181,12 @@ def upload(filename,uploadname,comment='Uploaded by SEAutoUpdate',chunksize=1638
             "filename": uploadname,
             "filesize": size,
             "filekey": data["upload"]["filekey"],
-            "format": "json",
             "token": token,
             "ignorewarnings": 1
         }
         filedata = {'chunk':('{}.jpg'.format(index), chunk, 'multipart/form-data')}
         index += 1
-        response = session.post(apiendpoint, files=filedata, data=params)
-        data = response.json()
+        data=post(params, files=filedata)
         util.pj(data)
 
     # Final upload using the filekey to commit the upload out of the stash area
@@ -166,14 +194,26 @@ def upload(filename,uploadname,comment='Uploaded by SEAutoUpdate',chunksize=1638
         "action": "upload",
         "filename": uploadname,
         "filekey": data["upload"]["filekey"],
-        "format": "json",
         "comment": comment,
         "token": token,
         "ignorewarnings":1
     }
-    response = session.post(apiendpoint, data=params)
-    data = response.json()
+    data=post(params)
     util.pj(data)
+
+def pageexists(title):
+    params={
+      "formatversion":"2",
+      "format":"json",
+      'action':'query',
+      'prop':'revisions',
+      'titles':title,
+      'rvlimit':'5',
+      'rvprop':'ids',
+    }
+    data=get(params)
+    util.pj(data)
+    return 'missing' not in data['query']['pages'][0]
 
 #pj(getpages(['umbrella']))
 

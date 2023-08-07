@@ -57,9 +57,9 @@ def getpages(pages):
     "action":"query",
     "prop":"revisions",
     "rvprop":'|'.join([
-      "content",
-      #"ids",
-      "timestamp"
+        "content",
+        #"ids",
+        "timestamp"
     ]),
     "rvslots":"main",
     "curtimestamp":"true",
@@ -68,33 +68,32 @@ def getpages(pages):
   return get(query)
 
 def login(name,pw):
-  query={
-       "action":"query",
-       "meta":"tokens",
-       "type":"login"
-  }
-  data=get(query)
-  token=data['query']['tokens']['logintoken']
-  query={
-       "action":"login",
-       "lgname":name,
-       "lgpassword":pw,
-       "lgtoken":token,
-  }
-  post(query)
-  print("Logged in as "+name)
-  #util.pj(response.json())
+    query={
+        "action":"query",
+        "meta":"tokens",
+        "type":"login"
+    }
+    data=get(query)
+    token=data['query']['tokens']['logintoken']
+    query={
+        "action":"login",
+        "lgname":name,
+        "lgpassword":pw,
+        "lgtoken":token,
+    }
+    post(query)
+    print("Logged in as "+name)
 
 def getcsrftoken():
     global csrftoken
     if csrftoken is None:
         query={
-           "action":"query",
-           "meta":"tokens"
+            "action":"query",
+            "meta":"tokens"
         }
         try:
-          data=get(query)
-          csrftoken=data['query']['tokens']['csrftoken']
+            data=get(query)
+            csrftoken=data['query']['tokens']['csrftoken']
         except:
             print("Error getting csrf token")
     return csrftoken
@@ -108,11 +107,11 @@ def gettimestamp():
     return data["curtimestamp"]
 
 def edit(title,content,start,base='now',summary='Automatically edited by SEAutoUpdate',minor=False,createonly=True):
-  token=getcsrftoken()
-  if not token:
-      print("edit failed: no token")
-      return
-  query={
+    token=getcsrftoken()
+    if not token:
+        print("edit failed: no token")
+        return
+    query={
        "action":"edit",
        "title":title,
        "text":content,
@@ -121,13 +120,12 @@ def edit(title,content,start,base='now',summary='Automatically edited by SEAutoU
        "starttimestamp":start,
        "token":token,
        "bot":"true",
-  }
-  if not minor:
-    query['notminor']='true'
-  if createonly:
-    query['createonly']='true'
-  
-  if not util.dryrun:
+    }
+    if not minor:
+        query['notminor']='true'
+    if createonly:
+        query['createonly']='true'
+
     data=post(query)
     return data
 

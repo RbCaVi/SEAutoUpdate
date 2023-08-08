@@ -22,12 +22,19 @@ diff_prefixes={
 }
 
 order=[
+    'stone-furnace',
+    'steel-furnace',
+    'electric-furnace',
+    'industrial-furnace',
     'burner-assembling-machine',
     'assembling-machine-1',
     'assembling-machine-2',
     'assembling-machine-3',
     'se-space-assembling-machine',
     'se-space-manufactory',
+    'chemical-plant',
+    'se-pulveriser',
+    'se-recycling-facility',
     'se-space-supercomputer-1',
     'se-space-supercomputer-2',
     'se-space-supercomputer-3',
@@ -54,21 +61,20 @@ order=[
 [
     'character',
     'character-jetpack',
-    
 ]
 
 def reorder(l):
     newl=[]
     for i in l:
-        if i not in order:
-            with open(os.path.join('unordered.txt'),'a') as f:
-                f.write(i)
-                f.write('\n')
         i=i.replace('-grounded','')
         if 'telescope' in i:
             i='se-space-telescope'
         if 'character' in i:
             i='character'
+        if i not in order:
+            with open(os.path.join('unordered.txt'),'a') as f:
+                f.write(i)
+                f.write('\n')
         newl.append(i)
     l=newl
     return [i for _,i in sorted({((order+[i]).index(i),i) for i in l})]

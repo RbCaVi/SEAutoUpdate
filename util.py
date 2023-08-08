@@ -140,7 +140,7 @@ entitytypes=[
   "tile-ghost"
 ]
 
-root='/storage/emulated/0/Documents/pydroid3/seauto/'
+root='/home/rvail/seauto/SEAutoUpdate/'
 
 todofile='todo.txt'
 

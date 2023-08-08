@@ -14,8 +14,6 @@ import json
 
 sio.use_plugin('pil')
 
-util.dryrun=False
-
 force=False
 forcepage=False
 forceimage=False

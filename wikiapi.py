@@ -1,8 +1,6 @@
 import json,requests,os,copy,requests.exceptions
 
 import util
-if util.qpy:
-  requests.urllib3.util.ssl_.DEFAULT_CIPHERS = "TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES-128-GCM-SHA256:TLS13-AES-256-GCM-SHA384:ECDHE:!COMPLEMENTOFDEFAULT"
 
 csrftoken=None
 
@@ -140,9 +138,6 @@ def upload(filename,uploadname,comment='Uploaded by SEAutoUpdate',chunksize=1638
     """Send multiple post requests to upload a file in chunks using `stash` mode.
     Stash mode is used to build a file up in pieces and then commit it at the end
     """
-    
-    if util.dryrun:
-        return
     
     file=open(filename,'rb')
     size=os.stat(filename).st_size

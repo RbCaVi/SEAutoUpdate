@@ -39,29 +39,26 @@ if regen:
 
 d=os.getcwd()
 os.chdir(util.fdir)
-if util.qpy:
-  outf=open(os.path.join(util.fdir,'factorio-current.log'))
+if regen:
+  subprocess.run(util.fexe+['--create','saves/protodump.zip'])
+  fproc=subprocess.Popen(util.fexe+['--start-server','saves/protodump.zip'],stdout=subprocess.PIPE,text=True)
+  outf=fproc.stdout
 else:
-  if regen:
-    subprocess.run(util.fexe+['--create','saves/protodump.zip'])
-    fproc=subprocess.Popen(util.fexe+['--start-server','saves/protodump.zip'],stdout=subprocess.PIPE,text=True)
-    outf=fproc.stdout
-  else:
-    #fproc=subprocess.Popen(['cat','factorio-current.log'],stdout=subprocess.PIPE,text=True)
-    outf=open(os.path.join(util.fdir,'factorio-current.log'))
-  #outf=fproc.stdout
+  #fproc=subprocess.Popen(['cat','factorio-current.log'],stdout=subprocess.PIPE,text=True)
+  outf=open(os.path.join(util.fdir,'factorio-current.log'))
+  print('from saved log')
+#outf=fproc.stdout
 
 fout=''
 while True:
-  out=outf.readline()
-#  print(out,end='')
+  out=outf.read(4096)
   fout=fout+out
-  if 'Hosting game at' in fout:
+  if 'Hosting game at' in out+fout[-20:]:
     break
 
 outf.close()
 
-if not util.qpy and regen:
+if regen:
   fproc.send_signal(signal.SIGINT)
 
 data=fout.split('__datalogger__/data-final-fixes.lua')[2]

@@ -64,7 +64,7 @@ def recipelocale(recipe,data=data.data):
   return recipelocaleraw(recipe,data)
 
 def recipelocaleraw(recipe,data=data.data):
-  print(recipe)
+  util.debug(recipe)
   if 'normal' in recipe:
     recipe=copy.deepcopy(recipe)
     recipe.update(recipe['normal'])
@@ -167,7 +167,7 @@ def techlocale(tech,data=data.data):
     try:
         pf=' '+str(int(name.rsplit('-',maxsplit=1)[1]))
         name=name.rsplit('-',maxsplit=1)[0]
-        print(name,pf)
+        util.debug(name,pf)
     except:
         pf=''
     if 'localised_description' not in tech:
@@ -192,7 +192,7 @@ def entityname(entity,data=data.data):
     return entitylocale(entity,data)[0]
 
 def recipename(recipe,data=data.data):
-    print(recipe)
+    util.debug(recipe)
     return recipelocale(recipe,data)[0]
 
 del f,fdata,line,locales

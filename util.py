@@ -150,10 +150,16 @@ fexe=['wine',os.path.join(fdir,'bin/x64/factorio.exe')]
 
 difficulty=['normal','expensive']
 
+dodebug=False
+
 def pj(x):
   if type(x) not in [int,float,dict,list,str] and x is not None:
     x=list(x)
-  print(json.dumps(x,indent=2))
+  debug(json.dumps(x,indent=2))
+
+def debug(*a):
+  if dodebug:
+    print(*a)
 
 def trace(f):
     def g(*args,**kwargs):

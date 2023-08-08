@@ -30,7 +30,7 @@ def get(query):
             print(f'error in GET{json.dumps(query)}, retrying')
             continue
         except requests.exceptions.ConnectionError as e:
-            print(f'error in POST{json.dumps(query)}, retrying')
+            print(f'error in GET{json.dumps(query)}, retrying')
             continue
     return data
 

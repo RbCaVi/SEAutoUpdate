@@ -36,15 +36,19 @@ def addrecipe(name):
 def addrecipes(names):
     entries.append({'type':'recipe','recipes':names})
 
-def additem(name,recipes=None):
+def additem(name,recipes=None,consumers=None):
     if recipes is None:
         recipes=process.produces["normal"].get(name,[])
-    entries.append({'type':'item','name':name,'recipes':recipes})
+    if consumers is None:
+        consumers=process.uses["normal"].get(name,[])
+    entries.append({'type':'item','name':name,'recipes':recipes,'consumers':consumers})
 
-def addfluid(name,group,recipes=None):
+def addfluid(name,group,recipes=None,consumers=None):
     if recipes is None:
         recipes=process.produces["normal"].get(name,[])
-    entries.append({'type':'fluid','name':name,'group':group,'recipes':recipes})
+    if consumers is None:
+        consumers=process.uses["normal"].get(name,[])
+    entries.append({'type':'fluid','name':name,'group':group,'recipes':recipes,'consumers':consumers})
 
 #datacards=[x for x in data.data['recipe'] if 'data' in x]
 

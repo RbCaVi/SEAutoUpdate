@@ -211,7 +211,7 @@ def makeicon(data,size=32):
     return True
 
 def geticon(name,size):
-   name=replaceroots(name,graphicsroots)
+   name=replaceroots(name,modroots)
    
    if '__' in name:
         print('icon not found: '+name)

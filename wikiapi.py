@@ -9,8 +9,11 @@ session=requests.Session()
 apiendpoint="https://spaceexploration.miraheze.org/w/api.php"
 headers={'User-Agent':"SEAutoUpdate/1.0 (robert@robertvail.info)"}
 
-username="RbCaVi@SEAutoUpdate"
-password="lrqc55rc1r6dqtgl3h9b1hq8u8ccbldv"
+with open('creds.txt') as f:
+    data=f.read()
+
+username=data.split('\n')[0]
+password=data.split('\n')[1]
 
 def get(query):
     query=copy.deepcopy(query)

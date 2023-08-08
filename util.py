@@ -140,23 +140,11 @@ entitytypes=[
   "tile-ghost"
 ]
 
-dryrun=True
-
-devel=True
-qpy=True
-
 root='/storage/emulated/0/Documents/pydroid3/seauto/'
 
 todofile='todo.txt'
 
-if qpy:
-  fdir='/storage/emulated/0/qpython/projects3/SEAutoUpdate-1/'
-  #fdir=os.path.dirname(sys.argv[0])
-else:
-  if len(sys.argv)>1:
-    fdir=sys.argv[1]
-  else:
-    fdir=os.getcwd()
+fdir='/home/rvail/Desktop/factorios/SEtest/'
 
 fexe=['wine',os.path.join(fdir,'bin/x64/factorio.exe')]
 

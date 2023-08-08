@@ -3,17 +3,14 @@ import util
 import copy
 import data
 
-if util.devel:
-  locales=[os.path.join(util.fdir,'locale.txt')]
-else:
-  mods=filter(lambda x:x.is_dir(),os.scandir(os.path.join(util.fdir,'mods')))
-  locales=[]
-  for mod in mods:
-    if os.path.exists(os.path.join(mod.path,'locale','en')):
-      locales+=[x.path for x in os.scandir(os.path.join(mod.path,'locale','en'))]
-  locales+=[x.path for x in os.scandir(os.path.join(util.fdir,'data','core','locale','en'))]
-  locales+=[x.path for x in os.scandir(os.path.join(util.fdir,'data','base','locale','en'))]
-  locales=[x for x in locales if x.endswith('.cfg')]
+mods=filter(lambda x:x.is_dir(),os.scandir(os.path.join(util.fdir,'mods')))
+locales=[]
+for mod in mods:
+  if os.path.exists(os.path.join(mod.path,'locale','en')):
+    locales+=[x.path for x in os.scandir(os.path.join(mod.path,'locale','en'))]
+locales+=[x.path for x in os.scandir(os.path.join(util.fdir,'data','core','locale','en'))]
+locales+=[x.path for x in os.scandir(os.path.join(util.fdir,'data','base','locale','en'))]
+locales=[x for x in locales if x.endswith('.cfg')]
 
 locale={}
 for file in locales:

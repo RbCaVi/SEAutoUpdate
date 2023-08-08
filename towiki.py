@@ -169,25 +169,26 @@ def towikirecipe(recipe,info=None,replace=None):
         ])
         recipestr=ings+' > '+ress
         info[prefix+'recipe'+postfix]=recipestr
-    print(recipe)
+    util.debug(recipe)
     techs=process.unlockedby['normal'].get(recipe,[])
     info['required-technologies']=[*map(locale.techname,techs)]
     return info
 
 def toinfobox(info):
     if 'producers' in info:
-      print(info['producers'])
+      util.debug(info['producers'])
       info['producers']=' + '.join(map(locale.entityname,reorder(set(info['producers']))))
     s='{{Infobox SE'
     for key in info:
         s+='\n|'
         s+=key
         s+='='
+        util.debug(key,info)
         val=info[key]
         if type(val)==int:
             val=str(val)
         elif type(val)!=str:
-            print(val)
+            util.debug(val)
             val=' + '.join(val)
         s+=val
     s+='\n}}'

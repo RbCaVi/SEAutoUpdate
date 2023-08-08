@@ -262,8 +262,8 @@ for entry in list(entries):
         traceback.print_exc()
         input()
         with open(os.path.join(util.root,'failed.txt'),'a') as f:
-            pass
-            f.write(' '.join(entry)+'\n')
+            f.write(json.dumps(data))
+            f.write('\n')
     finally:
         pass
         

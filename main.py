@@ -39,7 +39,7 @@ graphicsroots={
 #print(spacks)
 #for item in cards+spacks:
     
-def putitemonwiki(item,recipenames):
+def putitemonwiki(item,recipenames,consumers):
     idata=process.getitem(item)
     print(item,recipenames)
     
@@ -52,6 +52,7 @@ def putitemonwiki(item,recipenames):
     if force or forcepage or not wikiapi.pageexists(realname):
         info=towiki.towikiitem(item)
         info=towiki.towikirecipe(recipenames,info)
+        info=towiki.addconsumers(consumers,info)
         if len(recipenames)==0:
             info['producers']=silos # the only items without a recipe producing them are rocket launch products
         infobox=towiki.toinfobox(info)
@@ -66,7 +67,7 @@ def putitemonwiki(item,recipenames):
         
         util.pj(wikiapi.edit(realname,contents,time,createonly=False))
 
-def putfluidonwiki(fluid,group,recipenames):
+def putfluidonwiki(fluid,group,recipenames,consumers):
     idata=process.getitem(fluid)
     print(fluid,recipenames)
     
@@ -79,6 +80,7 @@ def putfluidonwiki(fluid,group,recipenames):
     if force or forcepage or not wikiapi.pageexists(realname):
         info=towiki.towikifluid(fluid,group)
         info=towiki.towikirecipe(recipenames,info)
+        info=towiki.addconsumers(consumers,info)
         infobox=towiki.toinfobox(info)
         
         category='\n<noinclude>[[Category:'+info['category']+']]</noinclude>'
@@ -247,9 +249,9 @@ def processentry(entry):
     elif t=='recipes':
         putrecipesonwiki(entry['recipes'])
     elif t=='item':
-        putitemonwiki(entry['name'],entry['recipes'])
+        putitemonwiki(entry['name'],entry['recipes'],entry['consumers'])
     elif t=='fluid':
-        putfluidonwiki(entry['name'],entry['group'],entry['recipes'])
+        putfluidonwiki(entry['name'],entry['group'],entry['recipes'],entry['consumers'])
 
 entries=read()
 

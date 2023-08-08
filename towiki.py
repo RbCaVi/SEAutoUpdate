@@ -1,3 +1,5 @@
+import os
+
 import process
 import data
 import util
@@ -59,7 +61,7 @@ def reorder(l):
     newl=[]
     for i in l:
         if i not in order:
-            with open('/storage/emulated/0/Documents/pydroid3/seauto/unordered.txt','a') as f:
+            with open(os.path.join('unordered.txt'),'a') as f:
                 f.write(i)
                 f.write('\n')
         i=i.replace('-grounded','')
@@ -69,7 +71,7 @@ def reorder(l):
             i='character'
         newl.append(i)
     l=newl
-    return [i for _,i in sorted([((order+[i]).index(i),i) for i in l])]
+    return [i for _,i in sorted({((order+[i]).index(i),i) for i in l})]
 
 postfixes=['','2','3','4','5']
 
@@ -171,7 +173,16 @@ def towikirecipe(recipe,info=None,replace=None):
         info[prefix+'recipe'+postfix]=recipestr
     util.debug(recipe)
     techs=process.unlockedby['normal'].get(recipe,[])
-    info['required-technologies']=[*map(locale.techname,techs)]
+    info['required-technologies']=info.get('required-technologies',[])+[*map(locale.techname,techs)]
+    info['required-technologies']=sorted(set(info['required-technologies']))
+    return info
+
+def addconsumers(consumers,info):
+    if info is None:
+        info=copy.deepcopy(defaultrinfo)
+    else:
+        info=copy.deepcopy(info)
+    info['consumers']=[*map(locale.recipename,consumers)]
     return info
 
 def toinfobox(info):
@@ -182,7 +193,7 @@ def toinfobox(info):
     for key in info:
         s+='\n|'
         s+=key
-        s+='='
+        s+=' = '
         util.debug(key,info)
         val=info[key]
         if type(val)==int:

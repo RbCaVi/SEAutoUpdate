@@ -20,8 +20,8 @@ for file in locales:
   category=None
   for line in fdata.split('\n'):
     #if 'module' in line:
-        #print(category)
-        #print(line)
+        #util.debug(category)
+        #util.debug(line)
     if line.strip()=='' or line.startswith(';') or line.startswith('#'):
       continue
     if line.startswith('[') and line.endswith(']'):
@@ -40,18 +40,18 @@ def localizeR(s):
     return localize(s,True)
 
 def localize(s,recursive=False):
-  print(s)
+  util.debug(s)
   if type(s)==list:
       if s[0]=='':
-          print(s)
+          util.debug(s)
           return ''.join(map(localizeR,s[1:]))
       l=locale.get(s[0]) or [None,s[0]][recursive]
       if l is None:
           return None
       for i in range(1,len(s)):
-          print(repr(l),repr(i),repr(s[i]))
+          util.debug(repr(l),repr(i),repr(s[i]))
           l=l.replace('__'+str(i)+'__',localize(s[i],True))
-          print(repr(l))
+          util.debug(repr(l))
       return l
   if type(s)==int:
       return str(s)
@@ -115,7 +115,7 @@ def itemlocale(item,data=data.data):
   for itype in util.itemtypes:
     if item in data[itype]:
       item=data[itype][item]
-      print(item)
+      util.debug(item)
       if 'localised_description' not in item:
         desc=localize('item-description.'+item['name'])
       else:

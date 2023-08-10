@@ -165,18 +165,8 @@ def towikirecipe(recipe,info=None,replace=None):
         if x not in n:
             continue
         prefix=diff_prefixes[x]
-        ings=' + '.join([
-        	   locale.itemlocale(ing[0],data.data)[0]+','+numtostr(ing[1])
-        	   for ing in
-        	   [['time',n[x]['time'],'time']]+n[x]['ingredients']
-        ])
-        ress=' + '.join([
-        	   locale.itemlocale(res[0],data.data)[0]+','+numtostr(res[1])
-        	   for res in
-        	   n[x]['results']
-        ])
-        recipestr=ings+' > '+ress
-        info[prefix+'recipe'+postfix]=recipestr
+        recipeparts=[[['time',n[x]['time'],'time']]+n[x]['ingredients'],n[x]['results']]
+        info[prefix+'recipe'+postfix]=recipeparts
     util.debug(recipe)
     techs=process.unlockedby['normal'].get(recipe,[])
     info['required-technologies']=info.get('required-technologies',[])+[*map(locale.techname,techs)]
@@ -192,6 +182,25 @@ def addconsumers(consumers,info):
     return info
 
 def toinfobox(info):
+    info=copy.deepcopy(info)
+    for postfix in postfixes:
+        for x in util.difficulty:
+            prefix=diff_prefixes[x]
+            if prefix+'recipe'+postfix not in info:
+                continue
+            r=info[prefix+'recipe'+postfix]
+            ings=' + '.join([
+                   locale.itemlocale(ing[0],data.data)[0]+','+numtostr(ing[1])
+                   for ing in
+                   r[0]
+            ])
+            ress=' + '.join([
+                   locale.itemlocale(res[0],data.data)[0]+','+numtostr(res[1])
+                   for res in
+                   r[1]
+            ])
+            recipestr=ings+' > '+ress
+            info[prefix+'recipe'+postfix]=recipestr
     if 'producers' in info:
       util.debug(info['producers'])
       info['producers']=' + '.join(map(locale.entityname,reorder(set(info['producers']))))
